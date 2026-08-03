@@ -10,6 +10,7 @@ export default defineConfig([
     target: 'node20',
     splitting: false,
     shims: false,
+    tsconfig: 'tsconfig.build.json',
   },
   {
     entry: { cli: 'src/cli.ts' },
@@ -20,5 +21,6 @@ export default defineConfig([
     target: 'node20',
     splitting: false,
     shims: false,
+    tsconfig: 'tsconfig.build.json',
   },
 ]);

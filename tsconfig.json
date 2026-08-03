@@ -14,12 +14,10 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "src",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src"],
-  "exclude": ["dist", "node_modules", "test"]
+  "include": ["src", "test", "tsup.config.ts"],
+  "exclude": ["dist", "node_modules"]
 }

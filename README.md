@@ -1,5 +1,7 @@
 # pubcheck
 
+> Published on npm as `pubcheck-cli` — the plain `pubcheck` name was already taken by an unrelated package. The CLI command itself is still `pubcheck`.
+
 One combined pass/fail verdict from [`publint`](https://publint.dev), [`arethetypeswrong`](https://arethetypeswrong.github.io) (attw), and [`Knip`](https://knip.dev) — instead of running all three separately and reading three different outputs.
 
 ```
@@ -18,7 +20,7 @@ knip
 Every one of these tools catches something the other two miss before you `npm publish`:
 
 - **publint** — package.json correctness: wrong `exports` map, broken `main`/`module`/`types` fields, ESM/CJS mismatches.
-- **attw** — whether your published *types* actually resolve the way your published *code* does, across `node10`/`node16`/`bundler` resolution.
+- **attw** — whether your published _types_ actually resolve the way your published _code_ does, across `node10`/`node16`/`bundler` resolution.
 - **Knip** — unused files, exports, and dependencies you're shipping (or forgot to ship).
 
 Running all three separately means three commands and three different output formats to reconcile by hand. `pubcheck` runs them together and gives you one verdict and one exit code.
@@ -26,7 +28,7 @@ Running all three separately means three commands and three different output for
 ## Install
 
 ```sh
-yarn add -D pubcheck
+yarn add -D pubcheck-cli
 ```
 
 ## Usage
@@ -56,13 +58,13 @@ Exit code is `0` when everything passes, `1` otherwise — safe to drop straight
 
 ```ts
 // pubcheck.config.ts
-import type { PubcheckConfig } from "pubcheck";
+import type { PubcheckConfig } from 'pubcheck-cli';
 
 export default {
-  skip: ["attw"], // e.g. for a package with no type declarations
+  skip: ['attw'], // e.g. for a package with no type declarations
   tools: {
-    publint: { level: "warning" }, // ignore suggestions, only fail on warning/error
-    knip: { args: ["--config", "knip.custom.json"] },
+    publint: { level: 'warning' }, // ignore suggestions, only fail on warning/error
+    knip: { args: ['--config', 'knip.custom.json'] },
   },
 } satisfies PubcheckConfig;
 ```
@@ -70,9 +72,9 @@ export default {
 ## Programmatic API
 
 ```ts
-import { runCheck } from "pubcheck";
+import { runCheck } from 'pubcheck-cli';
 
-const verdict = await runCheck({ cwd: "./packages/my-lib" });
+const verdict = await runCheck({ cwd: './packages/my-lib' });
 
 if (!verdict.pass) {
   console.log(verdict.summary); // { publint: true, attw: false, knip: true }

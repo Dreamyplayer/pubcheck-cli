@@ -1,5 +1,5 @@
 {
-  "name": "pubcheck",
+  "name": "pubcheck-cli",
   "version": "0.1.0",
   "description": "One combined pass/fail verdict from publint, arethetypeswrong, and Knip — instead of running all three separately.",
   "keywords": [
@@ -11,6 +11,7 @@
     "cli"
   ],
   "license": "MIT",
+  "author": "Bungamatla Sai Kumar",
   "type": "module",
   "sideEffects": false,
   "bin": {
@@ -62,6 +63,5 @@
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "vitest": "^4.1.10"
-  },
-  "packageManager": "yarn@1.22.19"
+  }
 }
