@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('execa', () => ({ execa: vi.fn() }));
-vi.mock('node:fs/promises', () => ({ readFile: vi.fn(), unlink: vi.fn() }));
+vi.mock('node:fs/promises', () => ({
+  mkdtemp: vi.fn(),
+  readFile: vi.fn(),
+  rm: vi.fn(),
+}));
 vi.mock('@arethetypeswrong/core', () => ({
   checkPackage: vi.fn(),
   createPackageFromTarballData: vi.fn(),
@@ -15,17 +19,18 @@ vi.mock('@arethetypeswrong/core/problems', () => ({
 
 import { checkPackage, createPackageFromTarballData } from '@arethetypeswrong/core';
 import { execa } from 'execa';
-import { readFile, unlink } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { runAttw } from '../../src/runners/attw.js';
 
 describe('runAttw', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(mkdtemp).mockResolvedValue('/tmp/pubcheck-attw-abc123');
     vi.mocked(execa).mockResolvedValue({
       stdout: JSON.stringify([{ filename: 'pubcheck-0.1.0.tgz' }]),
     } as never);
     vi.mocked(readFile).mockResolvedValue(Buffer.from('tarball-bytes'));
-    vi.mocked(unlink).mockResolvedValue(undefined);
+    vi.mocked(rm).mockResolvedValue(undefined);
     vi.mocked(createPackageFromTarballData).mockReturnValue({} as never);
   });
 
@@ -65,12 +70,22 @@ describe('runAttw', () => {
     expect(result.issues[0]?.message).toMatch(/no type declarations/i);
   });
 
-  it('always cleans up the packed tarball, even when checkPackage throws', async () => {
+  it("packs into an isolated temp dir via --pack-destination, never the project's own cwd", async () => {
+    vi.mocked(checkPackage).mockResolvedValue({ types: { kind: 'included' }, problems: [] } as never);
+
+    await runAttw({ cwd: '/fake/project' });
+
+    expect(execa).toHaveBeenCalledWith('npm', ['pack', '--json', '--pack-destination', '/tmp/pubcheck-attw-abc123'], {
+      cwd: '/fake/project',
+    });
+  });
+
+  it('always cleans up the temp dir, even when checkPackage throws', async () => {
     vi.mocked(checkPackage).mockRejectedValue(new Error('boom'));
 
     const result = await runAttw({ cwd: '/fake' });
     expect(result.runError).toBe('boom');
-    expect(unlink).toHaveBeenCalledWith(expect.stringContaining('pubcheck-0.1.0.tgz'));
+    expect(rm).toHaveBeenCalledWith('/tmp/pubcheck-attw-abc123', { recursive: true, force: true });
   });
 
   it('forwards toolOptions (e.g. entrypoints) to checkPackage', async () => {

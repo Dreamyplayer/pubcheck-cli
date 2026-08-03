@@ -1,7 +1,8 @@
 import { checkPackage, createPackageFromTarballData, type CheckPackageOptions } from '@arethetypeswrong/core';
 import { problemKindInfo } from '@arethetypeswrong/core/problems';
 import { execa } from 'execa';
-import { readFile, unlink } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { RunnerOptions, RunnerResult } from './types.js';
 
@@ -16,15 +17,26 @@ export type AttwToolOptions = CheckPackageOptions;
  * the API "may change significantly in patch and minor releases." Pin the
  * exact version in package.json (no `^`) and re-verify this file on every
  * bump — don't let it float.
+ *
+ * The tarball is packed into a fresh temp directory, never the project's
+ * own cwd. pubcheck runs publint/attw/knip concurrently (Promise.allSettled
+ * in index.ts) — a real (non-dry-run) `npm pack` writing its .tgz straight
+ * into cwd would race with publint's own directory scan happening at the
+ * same instant, and leaves an artifact behind in the user's project if
+ * cleanup ever fails (e.g. a transient Windows file lock). Packing to an
+ * isolated temp dir removes both problems: no shared file to race on, and
+ * a failed cleanup only leaves garbage in the OS temp dir, not the repo.
  */
 export async function runAttw({ cwd, toolOptions }: RunnerOptions): Promise<RunnerResult> {
   const opts = (toolOptions ?? {}) as AttwToolOptions;
-  let tarballPath: string | undefined;
+  let tmpDir: string | undefined;
 
   try {
-    const { stdout } = await execa('npm', ['pack', '--json'], { cwd });
+    tmpDir = await mkdtemp(join(tmpdir(), 'pubcheck-attw-'));
+
+    const { stdout } = await execa('npm', ['pack', '--json', '--pack-destination', tmpDir], { cwd });
     const [{ filename }] = JSON.parse(stdout) as [{ filename: string }];
-    tarballPath = join(cwd, filename);
+    const tarballPath = join(tmpDir, filename);
 
     const tarballData = await readFile(tarballPath);
     // Synchronous — createPackageFromTarballData returns a Package, not a Promise.
@@ -61,6 +73,6 @@ export async function runAttw({ cwd, toolOptions }: RunnerOptions): Promise<Runn
       runError: err instanceof Error ? err.message : String(err),
     };
   } finally {
-    if (tarballPath) await unlink(tarballPath).catch(() => {});
+    if (tmpDir) await rm(tmpDir, { recursive: true, force: true }).catch(() => {});
   }
 }
