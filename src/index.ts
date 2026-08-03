@@ -7,6 +7,9 @@ import type { Runner, RunnerResult, ToolName } from './runners/types.js';
 
 export type { PubcheckConfig } from './config.js';
 export type { Verdict } from './report/aggregate.js';
+export type { AttwToolOptions } from './runners/attw.js';
+export type { KnipToolOptions } from './runners/knip.js';
+export type { PublintToolOptions } from './runners/publint.js';
 export type { Issue, RunnerResult, Severity, ToolName } from './runners/types.js';
 
 const RUNNERS: Record<ToolName, Runner> = {

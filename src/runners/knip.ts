@@ -1,6 +1,11 @@
 import { execa } from 'execa';
 import type { Issue, RunnerOptions, RunnerResult } from './types.js';
 
+export interface KnipToolOptions {
+  /** Extra raw CLI args passed straight through, e.g. ["--config", "knip.custom.json"]. */
+  args?: string[];
+}
+
 interface KnipJsonIssueEntry {
   file: string;
   [issueType: string]: unknown;
@@ -16,12 +21,15 @@ interface KnipJsonReport {
  * reporter is the one output format Knip documents as a stable contract —
  * shell out to it instead of embedding.
  */
-export async function runKnip({ cwd }: RunnerOptions): Promise<RunnerResult> {
+export async function runKnip({ cwd, toolOptions }: RunnerOptions): Promise<RunnerResult> {
+  const opts = (toolOptions ?? {}) as KnipToolOptions;
+
   try {
-    const { stdout } = await execa('npx', ['knip', '--reporter', 'json', '--no-exit-code', '--no-progress'], {
-      cwd,
-      reject: false,
-    });
+    const { stdout } = await execa(
+      'npx',
+      ['knip', '--reporter', 'json', '--no-exit-code', '--no-progress', ...(opts.args ?? [])],
+      { cwd, reject: false },
+    );
 
     const report = JSON.parse(stdout) as KnipJsonReport;
     const issues: Issue[] = report.issues.flatMap(entry =>

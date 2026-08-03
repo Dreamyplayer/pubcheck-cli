@@ -2,9 +2,22 @@ import { publint } from 'publint';
 import { formatMessage } from 'publint/utils';
 import type { RunnerOptions, RunnerResult, Severity } from './types.js';
 
-export async function runPublint({ cwd }: RunnerOptions): Promise<RunnerResult> {
+export interface PublintToolOptions {
+  /** Minimum severity to report (default: "suggestion", i.e. everything). */
+  level?: 'suggestion' | 'warning' | 'error';
+  /** Treat warnings as errors. */
+  strict?: boolean;
+}
+
+export async function runPublint({ cwd, toolOptions }: RunnerOptions): Promise<RunnerResult> {
+  const opts = (toolOptions ?? {}) as PublintToolOptions;
+
   try {
-    const { messages, pkg } = await publint({ pkgDir: cwd, level: 'suggestion' });
+    const { messages, pkg } = await publint({
+      pkgDir: cwd,
+      level: opts.level ?? 'suggestion',
+      strict: opts.strict,
+    });
 
     return {
       tool: 'publint',

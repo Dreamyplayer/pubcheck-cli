@@ -22,7 +22,7 @@ export interface RunnerOptions {
   /** Absolute path to the package directory being checked. */
   cwd: string;
   /** Per-tool config overrides read from pubcheck.config.ts / package.json. */
-  toolOptions?: Record<string, unknown>;
+  toolOptions?: unknown;
 }
 
 export type Runner = (options: RunnerOptions) => Promise<RunnerResult>;

@@ -1,9 +1,11 @@
-import { checkPackage, createPackageFromTarballData } from '@arethetypeswrong/core';
+import { checkPackage, createPackageFromTarballData, type CheckPackageOptions } from '@arethetypeswrong/core';
 import { problemKindInfo } from '@arethetypeswrong/core/problems';
 import { execa } from 'execa';
 import { readFile, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { RunnerOptions, RunnerResult } from './types.js';
+
+export type AttwToolOptions = CheckPackageOptions;
 
 /**
  * attw's core API inspects a packed tarball, not a raw directory — this
@@ -15,7 +17,8 @@ import type { RunnerOptions, RunnerResult } from './types.js';
  * exact version in package.json (no `^`) and re-verify this file on every
  * bump — don't let it float.
  */
-export async function runAttw({ cwd }: RunnerOptions): Promise<RunnerResult> {
+export async function runAttw({ cwd, toolOptions }: RunnerOptions): Promise<RunnerResult> {
+  const opts = (toolOptions ?? {}) as AttwToolOptions;
   let tarballPath: string | undefined;
 
   try {
@@ -26,7 +29,7 @@ export async function runAttw({ cwd }: RunnerOptions): Promise<RunnerResult> {
     const tarballData = await readFile(tarballPath);
     // Synchronous — createPackageFromTarballData returns a Package, not a Promise.
     const pkg = createPackageFromTarballData(tarballData);
-    const result = await checkPackage(pkg);
+    const result = await checkPackage(pkg, opts);
 
     // CheckResult = Analysis | UntypedResult. A package with no types at all
     // has no `problems` array — that absence *is* the finding.
