@@ -1,6 +1,6 @@
 {
   "name": "pubcheck-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "One combined pass/fail verdict from publint, arethetypeswrong, and Knip — instead of running all three separately.",
   "keywords": [
     "publint",

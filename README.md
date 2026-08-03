@@ -1,7 +1,5 @@
 # pubcheck
 
-> Published on npm as `pubcheck-cli` — the plain `pubcheck` name was already taken by an unrelated package. The CLI command itself is still `pubcheck`.
-
 One combined pass/fail verdict from [`publint`](https://publint.dev), [`arethetypeswrong`](https://arethetypeswrong.github.io) (attw), and [`Knip`](https://knip.dev) — instead of running all three separately and reading three different outputs.
 
 ```
