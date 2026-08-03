@@ -11,11 +11,19 @@
     "cli"
   ],
   "license": "MIT",
-  "author": "Bungamatla Sai Kumar",
+  "author": "Dreamy Player",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dreamyplayer/pubcheck-cli.git"
+  },
+  "homepage": "https://github.com/Dreamyplayer/pubcheck-cli#readme",
+  "bugs": {
+    "url": "https://github.com/Dreamyplayer/pubcheck-cli/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "bin": {
-    "pubcheck": "./bin/pubcheck.js"
+    "pubcheck": "bin/pubcheck.js"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
