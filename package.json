@@ -1,0 +1,66 @@
+{
+  "name": "pubcheck",
+  "version": "0.1.0",
+  "description": "One combined pass/fail verdict from publint, arethetypeswrong, and Knip — instead of running all three separately.",
+  "keywords": [
+    "publint",
+    "arethetypeswrong",
+    "knip",
+    "package-quality",
+    "npm-publish",
+    "cli"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "bin": {
+    "pubcheck": "./bin/pubcheck.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "publint",
+    "prepublishOnly": "yarn build && yarn typecheck && yarn test"
+  },
+  "dependencies": {
+    "@arethetypeswrong/core": "0.18.5",
+    "commander": "^15.0.0",
+    "cosmiconfig": "^10.0.0",
+    "cosmiconfig-typescript-loader": "^6.3.0",
+    "execa": "^10.0.1",
+    "knip": "^6.31.0",
+    "picocolors": "^1.1.1",
+    "publint": "^0.3.22"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}
