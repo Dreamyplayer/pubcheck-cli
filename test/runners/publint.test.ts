@@ -74,4 +74,23 @@ describe('runPublint', () => {
     await runPublint({ cwd: '/fake', toolOptions: { level: 'error' } });
     expect(publint).toHaveBeenCalledWith(expect.objectContaining({ pkgDir: '/fake', level: 'error' }));
   });
+
+  it("defaults pack to 'npm', not publint's own 'auto' detection", async () => {
+    vi.mocked(publint).mockResolvedValue({ messages: [], pkg: {} } as never);
+
+    // Regression test: publint's "auto" pack mode detects a package manager
+    // by walking up for a lockfile. If pkgDir is nested inside another
+    // project's node_modules and that outer project has a yarn.lock, "auto"
+    // picks `yarn pack`, which has a real bug on nested node_modules targets
+    // (reports every declared file as "not published"). Forcing "npm" avoids it.
+    await runPublint({ cwd: '/fake' });
+    expect(publint).toHaveBeenCalledWith(expect.objectContaining({ pack: 'npm' }));
+  });
+
+  it('forwards an explicit pack override from toolOptions', async () => {
+    vi.mocked(publint).mockResolvedValue({ messages: [], pkg: {} } as never);
+
+    await runPublint({ cwd: '/fake', toolOptions: { pack: false } });
+    expect(publint).toHaveBeenCalledWith(expect.objectContaining({ pack: false }));
+  });
 });

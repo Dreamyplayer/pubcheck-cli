@@ -95,7 +95,7 @@ interface Verdict {
 
 ## How each tool is invoked
 
-- **publint** — called programmatically (`publint({ pkgDir })`); it's a pure function with a stable API.
+- **publint** — called programmatically (`publint({ pkgDir })`); it's a pure function with a stable API. `pack` is forced to `"npm"` rather than publint's own `"auto"` detection — `"auto"` picks a package manager by walking up for a lockfile, and if `pkgDir` sits nested inside another project's `node_modules` (e.g. `pubcheck ./node_modules/some-pkg`) with a `yarn.lock` in that outer project, `"auto"` picks `yarn pack`, which has a real bug on nested `node_modules` targets — it reports every declared file as "not published" even though it plainly exists. `npm publish` is what actually ships to the registry regardless of what package manager a project's author uses locally, so forcing `"npm"` is correct generally, not just a workaround. Override via `tools.publint.pack` if you need to.
 - **attw** — called programmatically against a real `npm pack` tarball (via `@arethetypeswrong/core`), so it sees exactly what would ship, after `files`/`.npmignore` filtering. `@arethetypeswrong/core` is still pre-1.0 and its README warns the API can change between minors — the dependency is pinned to an exact version rather than a caret range.
 - **Knip** — shelled out to (`npx knip --reporter json --no-exit-code`), not embedded. Knip's `main()` export exists but mutates `process.cwd`/`console` and its internal shape isn't guaranteed stable across minors; the JSON reporter is the one contract Knip documents as stable.
 

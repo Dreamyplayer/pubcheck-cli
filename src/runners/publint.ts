@@ -7,6 +7,22 @@ export interface PublintToolOptions {
   level?: 'suggestion' | 'warning' | 'error';
   /** Treat warnings as errors. */
   strict?: boolean;
+  /**
+   * Which package manager publint uses to pack pkgDir when determining
+   * "would this file actually be published". Defaults to "npm" here
+   * (NOT publint's own "auto" default) — regardless of what package
+   * manager the *project* uses locally, `npm publish` is what actually
+   * ships to the registry, so npm's pack semantics are what matter.
+   *
+   * This matters concretely: publint's "auto" mode detects a package
+   * manager by walking up for a lockfile. If pkgDir sits nested inside
+   * some other project's node_modules (e.g. `pubcheck ./node_modules/x`)
+   * and that outer project has a yarn.lock, "auto" picks `yarn pack` —
+   * which has a real bug packing nested node_modules targets and reports
+   * every file as "not published" even though it plainly exists.
+   * Forcing "npm" sidesteps that entirely.
+   */
+  pack?: 'auto' | 'npm' | 'yarn' | 'pnpm' | 'bun' | false;
 }
 
 export async function runPublint({ cwd, toolOptions }: RunnerOptions): Promise<RunnerResult> {
@@ -17,6 +33,7 @@ export async function runPublint({ cwd, toolOptions }: RunnerOptions): Promise<R
       pkgDir: cwd,
       level: opts.level ?? 'suggestion',
       strict: opts.strict,
+      pack: opts.pack ?? 'npm',
     });
 
     return {
